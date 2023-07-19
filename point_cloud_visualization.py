@@ -18,7 +18,7 @@ class TimeIt:
 def voxelize_point_cloud(data):
     return open3d.geometry.VoxelGrid.create_from_point_cloud(data, voxel_size=0.05)
 
-def convert_voxel_to_np_array_point_cloud(voxel_data):
+def convert_voxel_to_np_array_rgb_point_cloud(voxel_data):
     def get_point_as_list(pt):
         pt3d = list(voxel_data.origin + pt.grid_index * voxel_data.voxel_size)
         ptcolor = list(pt.color)
@@ -40,9 +40,9 @@ def octree_operations(point_cloud_data):
     print('Indices of points', leaf_node.indices, '\nTotal points = ', len(leaf_node.indices))
 
 def main():
-    parser = argparse.ArgumentParser(description='Tool to visualize Open3d point clouds') 
-    parser.add_argument('--filename', type=str, help='Input .pts file', required=True)                              
-    parser.add_argument('--voxelize', default=False, help='For downsampling', action='store_true')                              
+    parser = argparse.ArgumentParser(description='Tool to visualize Open3d point clouds')
+    parser.add_argument('--filename', type=str, help='Input .pts file', required=True)
+    parser.add_argument('--voxelize', default=False, help='For downsampling', action='store_true')
     args = parser.parse_args()
 
     with TimeIt('Time to load : ') as time_it:
@@ -50,15 +50,13 @@ def main():
 
     octree_operations(data)
 
-    print(data)
-
     if args.voxelize:
         with TimeIt('Time for voxelization : ') as time_it:
             data = voxelize_point_cloud(data)
 
         print('After voxelization : ', data)
 
-        new_data = convert_voxel_to_np_array_point_cloud(data)
+        new_data = convert_voxel_to_np_array_rgb_point_cloud(data)
 
     open3d.visualization.draw_geometries([get_open3d_point_cloud_from_np_array(new_data)], zoom=0.3412, 
                                       front=[0.4257, -0.2125, -0.8795], 
