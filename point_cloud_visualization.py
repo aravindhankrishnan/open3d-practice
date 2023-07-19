@@ -32,15 +32,23 @@ def get_open3d_point_cloud_from_np_array(points):
     cloud.colors = open3d.utility.Vector3dVector(points[:, 3:])
     return cloud
 
+def octree_operations(point_cloud_data):
+    octree = open3d.geometry.Octree(max_depth=8)
+    octree.convert_from_point_cloud(point_cloud_data)
+    leaf_node, tree_info = octree.locate_leaf_node(point_cloud_data.points[0])
+    print('Octree :', leaf_node, ' :: ', type(leaf_node))
+    print('Indices of points', leaf_node.indices, '\nTotal points = ', len(leaf_node.indices))
+
 def main():
     parser = argparse.ArgumentParser(description='Tool to visualize Open3d point clouds') 
     parser.add_argument('--filename', type=str, help='Input .pts file', required=True)                              
     parser.add_argument('--voxelize', default=False, help='For downsampling', action='store_true')                              
     args = parser.parse_args()
 
-    start = time.perf_counter()
     with TimeIt('Time to load : ') as time_it:
         data = open3d.io.read_point_cloud(args.filename)
+
+    octree_operations(data)
 
     print(data)
 
